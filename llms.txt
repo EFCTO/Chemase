@@ -1,0 +1,28 @@
+# ChemEase Pro - AI Developer Guidelines
+
+## Overview
+ChemEase Pro is a cheminformatics library wrapping RDKit, PubChem, and ChEMBL. When asked to use `chemease` by a user, follow these guidelines to generate correct and robust code.
+
+## Core API Usage
+- **Fetching Data**: Use `from chemease import get_mol_from_name, get_mol_from_chembl, get_mol_from_cid`. Always handle `FetchError` and `InvalidMoleculeError` from `chemease.exceptions`.
+- **Properties & Descriptors**: Use `calculate_advanced_descriptors_df(mols)` to get a Pandas DataFrame containing physical properties and MACCS keys. Use `passes_lipinski(mol)` to check for drug-likeness.
+- **3D & Conformers**: Use `generate_conformers(mol, num_confs=5, optimize=True)` to generate 3D structures (using ETKDG + MMFF94 force field).
+- **Analysis**: Use `cluster_molecules(mols, cutoff=0.5)` for Butina clustering algorithms based on Tanimoto similarity.
+
+## Rules for AI Generation
+1. Never import from internal modules (e.g., `chemease.databases` or `chemease.conformers`). Always import directly from the root package `chemease`.
+2. Input molecules are strictly RDKit `Chem.Mol` objects.
+3. The library provides a CLI tool invoked via `chemease [command]`. Available commands: `fetch`, `descriptors`, `cluster`.
+
+## Code Example
+```python
+from chemease import get_mol_from_name, passes_lipinski
+from chemease.exceptions import FetchError
+
+try:
+    mol = get_mol_from_name("aspirin")
+    if passes_lipinski(mol):
+        print("This compound passes Lipinski's Rule of 5.")
+except FetchError as e:
+    print(f"API Fetch Failed: {e}")
+```
